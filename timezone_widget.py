@@ -48,12 +48,17 @@ class TimeZoneWidget:
 
         # Alert flags for each notification
         self.alerts_played = {
-            "ny_open": False,
-            "ny_1530": False,
-            "ny_close": False,
-            "london_1545": False,
-            "london_1600": False,
-            "london_1630": False,
+            # UK alerts
+            "uk_0750": False,   # Premarket auction
+            "uk_0800": False,   # UK trading day starts
+            "uk_1530": False,   # 30min to FX/futures close
+            "uk_1600": False,   # FX and Futures close
+            "uk_1630": False,   # UK trading day close / LSE close
+            # US alerts
+            "ny_0900": False,   # 30min to NY open
+            "ny_0930": False,   # NY trading day starts
+            "ny_1530": False,   # 30min to NY close
+            "ny_1600": False,   # NY trading day ends
         }
 
         self._drag_data = {"x": 0, "y": 0}
@@ -101,7 +106,7 @@ class TimeZoneWidget:
 
     def create_title_bar(self):
         # Thin classic Windows-style title bar
-        title_bar = tk.Frame(self.root, bg=TITLE_BG, height=18)
+        title_bar = tk.Frame(self.root, bg=TITLE_BG, height=20)
         title_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
         title_bar.grid_propagate(False)
 
@@ -123,7 +128,7 @@ class TimeZoneWidget:
         self.title_label = tk.Label(
             title_bar,
             text=self.get_formatted_date(),
-            font=("Segoe UI", 8),
+            font=("Segoe UI", 9),
             fg=TITLE_FG,
             bg=TITLE_BG
         )
@@ -152,7 +157,7 @@ class TimeZoneWidget:
             city_label = tk.Label(
                 self.root,
                 text=city,
-                font=("Consolas", 9),
+                font=("Consolas", 11),
                 fg=TEXT_COLOR,
                 bg=BG_COLOR,
                 anchor="w",
@@ -233,44 +238,63 @@ class TimeZoneWidget:
         if london_time.weekday() >= 5:
             return
 
-        # NY Market Open - 9:30 AM ET
-        if (ny_time.hour == 9 and ny_time.minute == 30 and ny_time.second == 0
-                and not self.alerts_played["ny_open"]):
-            self.alerts_played["ny_open"] = True
-            self.announce_with_bell("New York Stock Exchange trading day has started.", rings=3)
+        # === UK ALERTS ===
 
-        # NY 15:30 - 30 min warning
+        # UK 07:50 - Premarket auction
+        if (london_time.hour == 7 and london_time.minute == 50 and london_time.second == 0
+                and not self.alerts_played["uk_0750"]):
+            self.alerts_played["uk_0750"] = True
+            self.announce_with_bell("UK premarket auction.", rings=1)
+
+        # UK 08:00 - Trading day starts
+        if (london_time.hour == 8 and london_time.minute == 0 and london_time.second == 0
+                and not self.alerts_played["uk_0800"]):
+            self.alerts_played["uk_0800"] = True
+            self.announce_with_bell("UK trading day has started.", rings=1)
+
+        # UK 15:30 - 30min to FX/futures close
+        if (london_time.hour == 15 and london_time.minute == 30 and london_time.second == 0
+                and not self.alerts_played["uk_1530"]):
+            self.alerts_played["uk_1530"] = True
+            self.announce_with_bell("30 minutes to London FX and futures close.", rings=1)
+
+        # UK 16:00 - FX and Futures close
+        if (london_time.hour == 16 and london_time.minute == 0 and london_time.second == 0
+                and not self.alerts_played["uk_1600"]):
+            self.alerts_played["uk_1600"] = True
+            self.announce_with_bell("London FX and Futures close.", rings=1)
+
+        # UK 16:30 - UK trading day close / LSE close
+        if (london_time.hour == 16 and london_time.minute == 30 and london_time.second == 0
+                and not self.alerts_played["uk_1630"]):
+            self.alerts_played["uk_1630"] = True
+            self.announce_with_bell("UK trading day has ended. London Stock Exchange close.", rings=1)
+
+        # === US/NY ALERTS ===
+
+        # NY 09:00 - 30min to NY open
+        if (ny_time.hour == 9 and ny_time.minute == 0 and ny_time.second == 0
+                and not self.alerts_played["ny_0900"]):
+            self.alerts_played["ny_0900"] = True
+            self.announce_with_bell("30 minutes to start of New York trading session.", rings=1)
+
+        # NY 09:30 - NY trading day starts
+        if (ny_time.hour == 9 and ny_time.minute == 30 and ny_time.second == 0
+                and not self.alerts_played["ny_0930"]):
+            self.alerts_played["ny_0930"] = True
+            self.announce_with_bell("US New York trading day has started.", rings=1)
+
+        # NY 15:30 - 30min to NY close
         if (ny_time.hour == 15 and ny_time.minute == 30 and ny_time.second == 0
                 and not self.alerts_played["ny_1530"]):
             self.alerts_played["ny_1530"] = True
-            self.announce_with_bell("30 minutes to end of trading day.", rings=1)
+            self.announce_with_bell("30 minutes to end of US New York trading day.", rings=1)
 
-        # NY Market Close - 16:00 ET
+        # NY 16:00 - NY trading day ends
         if (ny_time.hour == 16 and ny_time.minute == 0 and ny_time.second == 0
-                and not self.alerts_played["ny_close"]):
-            self.alerts_played["ny_close"] = True
-            self.announce_with_bell("New York Stock Exchange trading day has ended.", rings=2)
-
-        # London 15:45 - Warning
-        if (london_time.hour == 15 and london_time.minute == 45 and london_time.second == 0
-                and not self.alerts_played["london_1545"]):
-            self.alerts_played["london_1545"] = True
-            self.announce_with_bell(
-                "London FX and futures close in 15 minutes. London Stock Exchange close in 45 minutes.",
-                rings=3
-            )
-
-        # London 16:00 - FX and Futures close
-        if (london_time.hour == 16 and london_time.minute == 0 and london_time.second == 0
-                and not self.alerts_played["london_1600"]):
-            self.alerts_played["london_1600"] = True
-            self.announce_with_bell("London FX and Futures close.", rings=3)
-
-        # London 16:30 - Stock Exchange close
-        if (london_time.hour == 16 and london_time.minute == 30 and london_time.second == 0
-                and not self.alerts_played["london_1630"]):
-            self.alerts_played["london_1630"] = True
-            self.announce_with_bell("London Stock Exchange close.", rings=3)
+                and not self.alerts_played["ny_1600"]):
+            self.alerts_played["ny_1600"] = True
+            self.announce_with_bell("US New York trading day has ended.", rings=1)
 
     def update_times(self):
         for city, tz_name in ZONES:
