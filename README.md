@@ -9,16 +9,29 @@ A Bloomberg Terminal styled timezone widget for Windows with market open/close v
 
 - **Multi-timezone display**: Sofia, London, Chicago, New York
 - **Bloomberg Terminal theme**: Black background with orange text
-- **Market alerts with voice notifications**:
-  - NYSE open (9:30 AM ET) - 3 bells + voice
-  - NYSE 30-min warning (3:30 PM ET) - 1 bell + voice
-  - NYSE close (4:00 PM ET) - 2 bells + voice
-  - London FX/Futures 15-min warning (3:45 PM UK)
-  - London FX/Futures close (4:00 PM UK)
-  - London Stock Exchange close (4:30 PM UK)
 - **Always-on-top** draggable window
 - **Auto-start** with Windows
 - **Date display** in title bar (e.g., "Mon 27th Jan")
+- **Voice alerts** with bell sounds (female voice - Microsoft Zira)
+
+### UK Market Alerts
+
+| Time (UK) | Alert |
+|-----------|-------|
+| 07:50 | UK premarket auction |
+| 08:00 | UK trading day starts |
+| 15:30 | 30 minutes to London FX and futures close |
+| 16:00 | London FX and Futures close |
+| 16:30 | UK trading day ends / LSE close |
+
+### US/NY Market Alerts
+
+| Time (ET) | Alert |
+|-----------|-------|
+| 09:00 | 30 minutes to NY trading session |
+| 09:30 | US New York trading day starts |
+| 15:30 | 30 minutes to end of NY trading day |
+| 16:00 | US New York trading day ends |
 
 ## Installation
 
@@ -48,6 +61,13 @@ pyinstaller --noconsole --onefile --add-data "bell.wav;." --name "WorldClock" ti
 ```
 
 The executable will be in the `dist/` folder.
+
+### Add to Windows Startup
+
+The executable can be added to Windows startup by placing a shortcut in:
+```
+%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
+```
 
 ## Requirements
 
