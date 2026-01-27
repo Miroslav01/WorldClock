@@ -257,20 +257,20 @@ class TimeZoneWidget:
             self.alerts_played["london_1545"] = True
             self.announce_with_bell(
                 "London FX and futures close in 15 minutes. London Stock Exchange close in 45 minutes.",
-                rings=1
+                rings=3
             )
 
         # London 16:00 - FX and Futures close
         if (london_time.hour == 16 and london_time.minute == 0 and london_time.second == 0
                 and not self.alerts_played["london_1600"]):
             self.alerts_played["london_1600"] = True
-            self.announce_with_bell("London FX and Futures close.", rings=2)
+            self.announce_with_bell("London FX and Futures close.", rings=3)
 
         # London 16:30 - Stock Exchange close
         if (london_time.hour == 16 and london_time.minute == 30 and london_time.second == 0
                 and not self.alerts_played["london_1630"]):
             self.alerts_played["london_1630"] = True
-            self.announce_with_bell("London Stock Exchange close.", rings=2)
+            self.announce_with_bell("London Stock Exchange close.", rings=3)
 
     def update_times(self):
         for city, tz_name in ZONES:
