@@ -29,9 +29,9 @@ TITLE_FG = "#FF6600"
 
 # Path to sound files (handles both script and frozen executable)
 if getattr(sys, 'frozen', False):
-    SOUND_DIR = sys._MEIPASS
+    SOUND_DIR = os.path.join(sys._MEIPASS, "audio")
 else:
-    SOUND_DIR = os.path.dirname(os.path.abspath(__file__))
+    SOUND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audio")
 
 # Attention sound (plays before all announcements)
 ALERT_SOUND = os.path.join(SOUND_DIR, "alert_1.mp3")
