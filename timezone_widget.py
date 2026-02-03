@@ -27,11 +27,26 @@ TEXT_COLOR = "#FF6600"  # Bloomberg orange
 TITLE_BG = "#1a1a1a"
 TITLE_FG = "#FF6600"
 
-# Path to attention sound (handles both script and frozen executable)
+# Path to sound files (handles both script and frozen executable)
 if getattr(sys, 'frozen', False):
-    ATTENTION_SOUND = os.path.join(sys._MEIPASS, "call-to-attention-123107.mp3")
+    SOUND_DIR = sys._MEIPASS
 else:
-    ATTENTION_SOUND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "call-to-attention-123107.mp3")
+    SOUND_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Attention sound (plays before all announcements)
+ALERT_SOUND = os.path.join(SOUND_DIR, "alert_1.mp3")
+
+# UK session specific sounds
+UK_PREMARKET_AUCTION = os.path.join(SOUND_DIR, "uk_premarket_auctoin.mp3")
+UK_LONDON_START = os.path.join(SOUND_DIR, "london_start.mp3")
+UK_30MIN_TO_CLOSE = os.path.join(SOUND_DIR, "30min_to_L_close.mp3")
+UK_LONDON_CLOSE = os.path.join(SOUND_DIR, "Lonodn_close.mp3")
+
+# NY session specific sounds
+NY_30MIN_TO_OPEN = os.path.join(SOUND_DIR, "30mintostartNY.mp3")
+NY_START = os.path.join(SOUND_DIR, "NY_start.mp3")
+NY_30MIN_TO_CLOSE = os.path.join(SOUND_DIR, "30min_to_close_NY.mp3")
+NY_CLOSE = os.path.join(SOUND_DIR, "NY_close.mp3")
 
 class TimeZoneWidget:
     def __init__(self):
@@ -50,10 +65,9 @@ class TimeZoneWidget:
         self.alerts_played = {
             # UK alerts
             "uk_0750": False,   # Premarket auction
-            "uk_0800": False,   # UK trading day starts
-            "uk_1530": False,   # 30min to FX/futures close
-            "uk_1600": False,   # FX and Futures close
-            "uk_1630": False,   # UK trading day close / LSE close
+            "uk_0800": False,   # London start
+            "uk_1600": False,   # 30min to London close
+            "uk_1630": False,   # London close
             # US alerts
             "ny_0900": False,   # 30min to NY open
             "ny_0930": False,   # NY trading day starts
@@ -186,8 +200,15 @@ class TimeZoneWidget:
     def play_attention_sound(self):
         """Play attention sound once"""
         def play_sound():
-            playsound(ATTENTION_SOUND)
+            playsound(ALERT_SOUND)
         threading.Thread(target=play_sound, daemon=True).start()
+
+    def play_alert_then_sound(self, sound_file):
+        """Play alert sound then a specific sound file"""
+        def play_sounds():
+            playsound(ALERT_SOUND)
+            playsound(sound_file)
+        threading.Thread(target=play_sounds, daemon=True).start()
 
     def speak(self, text):
         """Text-to-speech announcement with female voice"""
@@ -202,10 +223,10 @@ class TimeZoneWidget:
         threading.Thread(target=say, daemon=True).start()
 
     def announce_with_sound(self, text):
-        """Play attention sound once then speak announcement with female voice"""
+        """Play alert sound once then speak announcement with female voice"""
         def do_announce():
-            # Play attention sound once
-            playsound(ATTENTION_SOUND)
+            # Play alert sound once
+            playsound(ALERT_SOUND)
             # Speak the announcement
             speaker = win32com.client.Dispatch("SAPI.SpVoice")
             voices = speaker.GetVoices()
@@ -244,31 +265,25 @@ class TimeZoneWidget:
         if (london_time.hour == 7 and london_time.minute == 50 and london_time.second == 0
                 and not self.alerts_played["uk_0750"]):
             self.alerts_played["uk_0750"] = True
-            self.announce_with_sound("UK premarket auction.")
+            self.play_alert_then_sound(UK_PREMARKET_AUCTION)
 
-        # UK 08:00 - Trading day starts
+        # UK 08:00 - London start
         if (london_time.hour == 8 and london_time.minute == 0 and london_time.second == 0
                 and not self.alerts_played["uk_0800"]):
             self.alerts_played["uk_0800"] = True
-            self.announce_with_sound("UK trading day has started.")
+            self.play_alert_then_sound(UK_LONDON_START)
 
-        # UK 15:30 - 30min to FX/futures close
-        if (london_time.hour == 15 and london_time.minute == 30 and london_time.second == 0
-                and not self.alerts_played["uk_1530"]):
-            self.alerts_played["uk_1530"] = True
-            self.announce_with_sound("30 minutes to London FX and futures close.")
-
-        # UK 16:00 - FX and Futures close
+        # UK 16:00 - 30min to London close
         if (london_time.hour == 16 and london_time.minute == 0 and london_time.second == 0
                 and not self.alerts_played["uk_1600"]):
             self.alerts_played["uk_1600"] = True
-            self.announce_with_sound("London FX and Futures close.")
+            self.play_alert_then_sound(UK_30MIN_TO_CLOSE)
 
-        # UK 16:30 - UK trading day close / LSE close
+        # UK 16:30 - London close
         if (london_time.hour == 16 and london_time.minute == 30 and london_time.second == 0
                 and not self.alerts_played["uk_1630"]):
             self.alerts_played["uk_1630"] = True
-            self.announce_with_sound("UK trading day has ended. London Stock Exchange close.")
+            self.play_alert_then_sound(UK_LONDON_CLOSE)
 
         # === US/NY ALERTS ===
 
@@ -276,25 +291,25 @@ class TimeZoneWidget:
         if (ny_time.hour == 9 and ny_time.minute == 0 and ny_time.second == 0
                 and not self.alerts_played["ny_0900"]):
             self.alerts_played["ny_0900"] = True
-            self.announce_with_sound("30 minutes to start of New York trading session.")
+            self.play_alert_then_sound(NY_30MIN_TO_OPEN)
 
         # NY 09:30 - NY trading day starts
         if (ny_time.hour == 9 and ny_time.minute == 30 and ny_time.second == 0
                 and not self.alerts_played["ny_0930"]):
             self.alerts_played["ny_0930"] = True
-            self.announce_with_sound("US New York trading day has started.")
+            self.play_alert_then_sound(NY_START)
 
         # NY 15:30 - 30min to NY close
         if (ny_time.hour == 15 and ny_time.minute == 30 and ny_time.second == 0
                 and not self.alerts_played["ny_1530"]):
             self.alerts_played["ny_1530"] = True
-            self.announce_with_sound("30 minutes until New York session close.")
+            self.play_alert_then_sound(NY_30MIN_TO_CLOSE)
 
         # NY 16:00 - NY trading day ends
         if (ny_time.hour == 16 and ny_time.minute == 0 and ny_time.second == 0
                 and not self.alerts_played["ny_1600"]):
             self.alerts_played["ny_1600"] = True
-            self.announce_with_sound("US New York trading day has ended.")
+            self.play_alert_then_sound(NY_CLOSE)
 
     def update_times(self):
         for city, tz_name in ZONES:
