@@ -46,7 +46,7 @@ UK_LONDON_CLOSE = os.path.join(SOUND_DIR, "Lonodn_close.mp3")
 NY_30MIN_TO_OPEN = os.path.join(SOUND_DIR, "30mintostartNY.mp3")
 NY_START = os.path.join(SOUND_DIR, "NY_start.mp3")
 NY_30MIN_TO_CLOSE = os.path.join(SOUND_DIR, "30min_to_close_NY.mp3")
-NY_CLOSE = os.path.join(SOUND_DIR, "NY_close.mp3")
+NY_CLOSE = os.path.join(SOUND_DIR, "ny_session_end.mp3")
 
 class TimeZoneWidget:
     def __init__(self):
